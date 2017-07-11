@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "jsx": "react"
+  },
+  "exclude": [
+    "node_modules",
+    "Scripts/Build"
+  ],
+  "files": [
+    "typings/index.d.ts"
+  ]
+}

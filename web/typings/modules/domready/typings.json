@@ -1,0 +1,11 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/types/npm-domready/20df138f0d5de36e2663dc4ff8bb5d98fc8f7639/typings.json",
+    "raw": "registry:npm/domready#1.0.8+20160723033700",
+    "main": "domready.d.ts",
+    "version": "1.0.8",
+    "name": "domready",
+    "type": "typings"
+  }
+}

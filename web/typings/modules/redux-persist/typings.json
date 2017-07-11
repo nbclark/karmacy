@@ -1,0 +1,18 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/pellejacobs/typed-redux-persist/78616886cb5ebe7108b4e1b2b7d445abda35e287/typings.json",
+    "raw": "registry:npm/redux-persist#3.2.2+20160817092816",
+    "main": "index.d.ts",
+    "version": "3.2.2",
+    "dependencies": {
+      "redux": {
+        "src": "https://raw.githubusercontent.com/reactjs/redux/d18a977260cf29d49499781367f56353ebd9697a/index.d.ts",
+        "raw": "github:reactjs/redux/index.d.ts#d18a977260cf29d49499781367f56353ebd9697a",
+        "typings": "https://raw.githubusercontent.com/reactjs/redux/d18a977260cf29d49499781367f56353ebd9697a/index.d.ts"
+      }
+    },
+    "name": "redux-persist",
+    "type": "typings"
+  }
+}
