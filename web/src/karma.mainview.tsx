@@ -1,6 +1,6 @@
 /// <reference path="../typings/index.d.ts" />
-import Actions from './karma.store.actions.tsx'
-import Component from './karma.component.tsx'
+import Actions from './karma.store.actions'
+import Component from './karma.component'
 import { pushPath } from 'redux-simple-router'
 import { Link } from 'react-router'
 import * as ReactRedux from 'react-redux'

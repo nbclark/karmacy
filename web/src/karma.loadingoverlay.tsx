@@ -1,5 +1,5 @@
 /// <reference path="../typings/index.d.ts" />
-import Component from './karma.component.tsx'
+import Component from './karma.component'
 import * as React from 'react'
 
 interface IComponentProps extends React.Props<LoadingOverlay> {

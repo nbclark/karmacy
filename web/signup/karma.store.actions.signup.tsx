@@ -1,7 +1,7 @@
 /// <reference path="../typings/index.d.ts" />
 import * as React from 'react'
-import Karma from './karma.tsx'
-import { store } from './karma.store.tsx'
+import Karma from './karma'
+import { store } from './karma.store'
 
 class Actions {
 

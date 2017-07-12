@@ -2,15 +2,15 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as ReactRedux from 'react-redux'
-import Karma from './karma.tsx'
-import API from './karma.api.signup.tsx'
-import SignupView from './karma.signupview.tsx'
-import { store } from './karma.store.tsx'
-import Actions from './karma.store.actions.signup.tsx'
+import Karma from './karma'
+import API from './karma.api.signup'
+import SignupView from './karma.signupview'
+import { store } from './karma.store'
+import Actions from './karma.store.actions.signup'
 import { IndexRoute, Router, Route, Link, browserHistory } from 'react-router'
 import { syncReduxAndRouter, routeReducer } from 'redux-simple-router'
 import { createHistory } from 'history'
-import DevTools from './redux.devtools.tsx'
+import DevTools from './redux.devtools'
 
 const history = createHistory()
 

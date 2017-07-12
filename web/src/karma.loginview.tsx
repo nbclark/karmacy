@@ -1,6 +1,6 @@
 /// <reference path="../typings/index.d.ts" />
-import Component from './karma.component.tsx'
-import Actions from './karma.store.actions.login.tsx'
+import Component from './karma.component'
+import Actions from './karma.store.actions.login'
 import * as ReactRedux from 'react-redux'
 import * as React from 'react'
 

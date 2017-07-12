@@ -1,8 +1,8 @@
 /// <reference path="../typings/index.d.ts" />
-import { reducers, events } from './karma.store.reducers.tsx'
+import { reducers, events } from './karma.store.reducers'
 import { combineReducers, applyMiddleware, compose, createStore } from 'redux'
 import {persistStore, autoRehydrate} from 'redux-persist'
-import DevTools from './redux.devtools.tsx'
+import DevTools from './redux.devtools'
 
 var thunkMiddleware = (state) => {
   return (next) => {

@@ -2,7 +2,7 @@
 import * as Redux from 'redux'
 import * as Update from 'react-addons-update'
 import {REHYDRATE} from 'redux-persist/constants'
-import Karma from './karma.tsx'
+import Karma from './karma'
 import { syncReduxAndRouter, routeReducer } from 'redux-simple-router'
 const Cookies = require('./js.cookie-2.1.0.min.js')
 

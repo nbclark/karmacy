@@ -1,6 +1,6 @@
 /// <reference path="../typings/index.d.ts" />
 import * as React from 'react'
-import Karma from './karma.tsx'
+import Karma from './karma'
 import { pushPath } from 'redux-simple-router'
 
 var actions = {

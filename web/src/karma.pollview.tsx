@@ -1,8 +1,8 @@
 /// <reference path="../typings/index.d.ts" />
-import Actions from './karma.store.actions.tsx'
-import Component from './karma.component.tsx'
-import PollResultView from './karma.pollresultview.tsx'
-import PollTakeView from './karma.polltakeview.tsx'
+import Actions from './karma.store.actions'
+import Component from './karma.component'
+import PollResultView from './karma.pollresultview'
+import PollTakeView from './karma.polltakeview'
 import { Router, Route, Link } from 'react-router'
 import * as React from 'react'
 

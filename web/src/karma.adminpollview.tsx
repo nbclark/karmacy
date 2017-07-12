@@ -1,6 +1,6 @@
 /// <reference path="../typings/index.d.ts" />
-import Actions from './karma.store.actions.tsx'
-import Component from './karma.component.tsx'
+import Actions from './karma.store.actions'
+import Component from './karma.component'
 import { Router, Route, Link } from 'react-router'
 import * as React from 'react'
 

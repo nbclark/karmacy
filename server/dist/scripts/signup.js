@@ -75,15 +75,15 @@
 
 	var _karma2 = _interopRequireDefault(_karma);
 
-	var _karmaApiSignup = __webpack_require__(220);
+	var _karmaApi = __webpack_require__(220);
 
-	var _karmaApiSignup2 = _interopRequireDefault(_karmaApiSignup);
+	var _karmaApi2 = _interopRequireDefault(_karmaApi);
 
-	var _karmaSignupview = __webpack_require__(221);
+	var _karma3 = __webpack_require__(221);
 
-	var _karmaSignupview2 = _interopRequireDefault(_karmaSignupview);
+	var _karma4 = _interopRequireDefault(_karma3);
 
-	var _karmaStore = __webpack_require__(224);
+	var _karma5 = __webpack_require__(224);
 
 	var _reactRouter = __webpack_require__(582);
 
@@ -91,18 +91,18 @@
 
 	var _history = __webpack_require__(640);
 
-	var _reduxDevtools = __webpack_require__(250);
+	var _redux = __webpack_require__(250);
 
-	var _reduxDevtools2 = _interopRequireDefault(_reduxDevtools);
+	var _redux2 = _interopRequireDefault(_redux);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 	var history = (0, _history.createHistory)();
-	(0, _reduxSimpleRouter.syncReduxAndRouter)(history, _karmaStore.store);
-	_karma2.default.API = new _karmaApiSignup2.default(_karmaStore.store);
-	exports.default = ReactDOM.render(React.createElement(ReactRedux.Provider, { store: _karmaStore.store }, React.createElement("div", null, React.createElement(_reactRouter.Router, { history: _reactRouter.browserHistory }, React.createElement(_reactRouter.Route, { path: "/signup", component: _karmaSignupview2.default })), React.createElement(_reduxDevtools2.default, null))), document.getElementById('content'));
+	(0, _reduxSimpleRouter.syncReduxAndRouter)(history, _karma5.store);
+	_karma2.default.API = new _karmaApi2.default(_karma5.store);
+	exports.default = ReactDOM.render(React.createElement(ReactRedux.Provider, { store: _karma5.store }, React.createElement("div", null, React.createElement(_reactRouter.Router, { history: _reactRouter.browserHistory }, React.createElement(_reactRouter.Route, { path: "/signup", component: _karma4.default })), React.createElement(_redux2.default, null))), document.getElementById('content'));
 
 /***/ }),
 /* 2 */
@@ -24366,13 +24366,13 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _karmaComponent = __webpack_require__(222);
+	var _karma = __webpack_require__(222);
 
-	var _karmaComponent2 = _interopRequireDefault(_karmaComponent);
+	var _karma2 = _interopRequireDefault(_karma);
 
-	var _karmaStoreActionsSignup = __webpack_require__(223);
+	var _karmaStoreActions = __webpack_require__(223);
 
-	var _karmaStoreActionsSignup2 = _interopRequireDefault(_karmaStoreActionsSignup);
+	var _karmaStoreActions2 = _interopRequireDefault(_karmaStoreActions);
 
 	var _reactRedux = __webpack_require__(187);
 
@@ -24445,7 +24445,7 @@
 	        key: '_sendClicked',
 	        value: function _sendClicked(ev) {
 	            //Do validation on form here
-	            this.props.dispatch(_karmaStoreActionsSignup2.default.companySignup(this.state.companyName, this.state.companyDomain, this.state.contactFirstName, this.state.contactLastName, this.state.contactEmail, this.state.contactPhone));
+	            this.props.dispatch(_karmaStoreActions2.default.companySignup(this.state.companyName, this.state.companyDomain, this.state.contactFirstName, this.state.contactLastName, this.state.contactEmail, this.state.contactPhone));
 	        }
 	    }, {
 	        key: 'render',
@@ -24476,7 +24476,7 @@
 	    }]);
 
 	    return SignupView;
-	}(_karmaComponent2.default);
+	}(_karma2.default);
 
 	function SignupViewState(state) {
 	    return state;
@@ -24601,15 +24601,15 @@
 	});
 	exports.events = exports.persist = exports.store = undefined;
 
-	var _karmaStoreReducers = __webpack_require__(225);
+	var _karmaStore = __webpack_require__(225);
 
 	var _redux = __webpack_require__(196);
 
 	var _reduxPersist = __webpack_require__(230);
 
-	var _reduxDevtools = __webpack_require__(250);
+	var _redux2 = __webpack_require__(250);
 
-	var _reduxDevtools2 = _interopRequireDefault(_reduxDevtools);
+	var _redux3 = _interopRequireDefault(_redux2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -24626,14 +24626,14 @@
 	};
 	//const persist = persistStore(store)
 	// autoRehydrate()(createStore)
-	var store = (0, _redux.compose)((0, _redux.applyMiddleware)(thunkMiddleware), _reduxDevtools2.default.instrument())(_redux.createStore)((0, _redux.combineReducers)(_karmaStoreReducers.reducers), {});
+	var store = (0, _redux.compose)((0, _redux.applyMiddleware)(thunkMiddleware), _redux3.default.instrument())(_redux.createStore)((0, _redux.combineReducers)(_karmaStore.reducers), {});
 	var persist = (0, _reduxPersist.persistStore)(store);
-	for (var key in _karmaStoreReducers.events) {
-	    _karmaStoreReducers.events[key].getState = store.getState;
+	for (var key in _karmaStore.events) {
+	    _karmaStore.events[key].getState = store.getState;
 	}
 	exports.store = store;
 	exports.persist = persist;
-	exports.events = _karmaStoreReducers.events;
+	exports.events = _karmaStore.events;
 
 /***/ }),
 /* 225 */

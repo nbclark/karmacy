@@ -1,8 +1,8 @@
 /// <reference path="../typings/index.d.ts" />
-import Actions from './karma.store.actions.tsx'
-import LoadingOverlay from './karma.loadingoverlay.tsx'
-import Component from './karma.component.tsx'
-import TeamView from './karma.teamview.tsx'
+import Actions from './karma.store.actions'
+import LoadingOverlay from './karma.loadingoverlay'
+import Component from './karma.component'
+import TeamView from './karma.teamview'
 import { Router, Route, Link } from 'react-router'
 import * as React from 'react'
 

@@ -1,5 +1,6 @@
 /// <reference path="../typings/index.d.ts" />
-import Actions from './karma.store.actions.login.tsx'
+import Actions from './karma.store.actions.login'
+const Horizon = require('@horizon/client')
 
 class API {
   retryQueue: Array<any>
@@ -7,6 +8,7 @@ class API {
   store: any
   apiRootUrl: string
   lastRefresh: Date
+  horizon: any
 
   constructor(store) {
     this.retryQueue = []
@@ -14,25 +16,43 @@ class API {
     this.apiRootUrl = '/api/'
   }
 
+  connect(token: string) {
+    this.horizon = Horizon({
+      host: 'localhost:9000',
+      secure: false,
+      authType: {
+        storeLocally: true,
+        token: token
+      }
+    })
+    this.horizon.onReady(() => {
+    })
+
+    this.horizon.onSocketError((err) => {
+    })
+
+    this.horizon.connect()
+  }
+
   authenticate(email, password) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.post(
-      '/identity/authenticate',
-      JSON.stringify({ username: email, password: password }),
-      null,
-      'json'
-    ).done((data) => {
-      console.log('got tokens')
-      this.tokens = data
-      promise.resolve(data)
-    }).
-      fail(() => {
-        promise.reject()
-      })
+      $.post(
+        '/identity/authenticate',
+        JSON.stringify({ username: email, password: password }),
+        null,
+        'json'
+      )
+        .done((data) => {
+          console.log('got tokens')
+          this.tokens = data
+          resolve(data)
+        })
+        .fail(() => {
+          reject()
+        })
 
-    return promise
+    })
   }
 
   refreshAccessToken(token) {
@@ -44,421 +64,421 @@ class API {
     }
 
     this.lastRefresh = now
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.post(
-      '/identity/refresh',
-      JSON.stringify({ refresh_token: token }),
-      null,
-      'json'
-    ).done(function (data) {
-      console.log('got tokens')
-      self.tokens = data
-      promise.resolve(data)
-    }).
-      fail(function () {
-        promise.reject()
-      })
+      $.post(
+        '/identity/refresh',
+        JSON.stringify({ refresh_token: token }),
+        null,
+        'json'
+      )
+        .done((data) => {
+          console.log('got tokens')
+          this.tokens = data
+          resolve(data)
+        })
+        .fail(function () {
+          reject()
+        })
 
-    return promise
+    })
   }
 
   loadMe() {
-    var self = this
-    var promise = $.Deferred()
-
-    $.ajax(
-      this.apiRootUrl + 'me', {
-        // beforeSend: function (xhr) {
-        //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens['access_token'])
-        // },
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      console.log(data)
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          this._processAccessTokenExpiration(this.loadMe.bind(this))
+    return new Promise((resolve, reject) => {
+      $.ajax(
+        this.apiRootUrl + 'me', {
+          // beforeSend: (xhr) => {
+          //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens['access_token'])
+          // },
+          contentType: 'application/json'
         }
-      }.bind(this))
-
-    return promise
+      )
+        .done((data) => {
+          console.log(data)
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            this._processAccessTokenExpiration(this.loadMe)
+          } else {
+            reject()
+          }
+        })
+    })
   }
 
   loadTeams() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'teams', {
-        // beforeSend: function (xhr) {
-        //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
-        // },
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          this._processAccessTokenExpiration(this.loadUsers.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'teams', {
+          // beforeSend: (xhr) => {
+          //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
+          // },
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            this._processAccessTokenExpiration(this.loadTeams)
+          }
+        })
 
-    return promise
+    })
   }
 
   loadCompany() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'company', {
-        // beforeSend: function (xhr) {
-        //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
-        // },
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          this._processAccessTokenExpiration(this.loadUsers.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'company', {
+          // beforeSend: (xhr) => {
+          //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
+          // },
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            this._processAccessTokenExpiration(this.loadCompany)
+          }
+        })
 
-    return promise
+    })
   }
 
   loadPoll() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'poll', {
-        // beforeSend: function (xhr) {
-        //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
-        // },
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        promise.resolve(null)
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'poll', {
+          // beforeSend: (xhr) => {
+          //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
+          // },
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          resolve(null)
+        })
 
-    return promise
+    })
   }
 
   loadMembers() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'company/accounts', {
-        // beforeSend: function (xhr) {
-        //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
-        // },
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        promise.resolve([])
-        // if (xhr.status == 401) {
-        //   this._processAccessTokenExpiration(this.loadUsers.bind(this))
-        // }
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'company/accounts', {
+          // beforeSend: (xhr) => {
+          //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
+          // },
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          resolve([])
+          // if (xhr.status == 401) {
+          //   this._processAccessTokenExpiration(this.loadUsers)
+          // }
+        })
 
-    return promise
+    })
   }
 
   loadProducts() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'products', {
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        debugger
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'products', {
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          debugger
+        })
 
-    return promise
+    })
   }
 
   loadQuestions() {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'questions', {
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        debugger
-        promise.resolve([])
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'questions', {
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          debugger
+          resolve([])
+        })
 
-    return promise
+    })
   }
 
   loadPollResults(instanceID) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'poll/' + instanceID, {
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        debugger
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'poll/' + instanceID, {
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          debugger
+        })
 
-    return promise
+    })
   }
 
   createQuestion(title, options, type, position) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'questions', {
-        type: "POST",
-        data: JSON.stringify({ Title: title, Options: options, QuestionType: type, Position: position }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'questions', {
+          type: "POST",
+          data: JSON.stringify({ Title: title, Options: options, QuestionType: type, Position: position }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   setQuestionPosition(questionID, position) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'questions/' + questionID, {
-        type: "PUT",
-        data: JSON.stringify({ Position: position }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'questions/' + questionID, {
+          type: "PUT",
+          data: JSON.stringify({ Position: position }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   createTeam(teamName) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'teams', {
-        type: "POST",
-        data: JSON.stringify({ Name: teamName }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'teams', {
+          type: "POST",
+          data: JSON.stringify({ Name: teamName }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   createProduct(name, description, price, quantity) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'products', {
-        type: "POST",
-        data: JSON.stringify({ Name: name, Description: description, Price: price, Quantity: quantity }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        debugger
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'products', {
+          type: "POST",
+          data: JSON.stringify({ Name: name, Description: description, Price: price, Quantity: quantity }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          debugger
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   submitPollResponse(pollID, option, response, suggestion) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'poll/instanceid/' + pollID, {
-        type: "POST",
-        data: JSON.stringify({
-          Option: option,
-          Response: response,
-          Suggestion: suggestion
-        }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'poll/instanceid/' + pollID, {
+          type: "POST",
+          data: JSON.stringify({
+            Option: option,
+            Response: response,
+            Suggestion: suggestion
+          }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   sendPollResponseMessage(instanceID, pollID, comments) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'poll/' + instanceID + '/' + pollID + '/message', {
-        type: "POST",
-        data: JSON.stringify({
-          Comments: comments
-        }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'poll/' + instanceID + '/' + pollID + '/message', {
+          type: "POST",
+          data: JSON.stringify({
+            Comments: comments
+          }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   purchaseProduct(productID, price) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'purchase', {
-        type: "POST",
-        data: JSON.stringify({ ProductID: productID, Price: price }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        promise.reject(xhr.status, xhr.statusText, xhr.responseText)
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'purchase', {
+          type: "POST",
+          data: JSON.stringify({ ProductID: productID, Price: price }),
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          reject(xhr.responseText)
+        })
 
-    return promise
+    })
   }
 
   donateKarma(toAccountID, amount, message) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'donate', {
-        type: "POST",
-        data: JSON.stringify({ ToAccountID: toAccountID, Amount: amount, Message: message }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        promise.reject(xhr.status, xhr.statusText, xhr.responseText)
-      }.bind(this))
+      $.ajax(
+        this.apiRootUrl + 'donate', {
+          type: "POST",
+          data: JSON.stringify({ ToAccountID: toAccountID, Amount: amount, Message: message }),
+          contentType: 'application/json'
+        }
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          reject(xhr.responseText)
+        })
 
-    return promise
+    })
   }
 
   assignMember(memberID, teamID) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'teams/members', {
-        type: "POST",
-        data: JSON.stringify({ MemberID: memberID, TeamID: teamID }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'teams/members', {
+          type: "POST",
+          data: JSON.stringify({ MemberID: memberID, TeamID: teamID }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   sendInvite(email, firstName, lastName, role, teamID) {
-    var self = this
-    var promise = $.Deferred()
+    return new Promise((resolve, reject) => {
 
-    $.ajax(
-      this.apiRootUrl + 'company/accounts', {
-        type: "POST",
-        data: JSON.stringify({
-          Email: email, Role: role, TeamID: teamID,
-          FirstName: firstName,
-          LastName: lastName
-        }),
-        contentType: 'application/json'
-      }
-    ).done(function (data) {
-      promise.resolve(data)
-    }).
-      fail(function (xhr) {
-        if (xhr.status == 401) {
-          debugger
+      $.ajax(
+        this.apiRootUrl + 'company/accounts', {
+          type: "POST",
+          data: JSON.stringify({
+            Email: email, Role: role, TeamID: teamID,
+            FirstName: firstName,
+            LastName: lastName
+          }),
+          contentType: 'application/json'
         }
-      }.bind(this))
+      )
+        .done((data) => {
+          resolve(data)
+        })
+        .fail((xhr) => {
+          if (xhr.status == 401) {
+            debugger
+          }
+        })
 
-    return promise
+    })
   }
 
   replayFailedRequests() {
