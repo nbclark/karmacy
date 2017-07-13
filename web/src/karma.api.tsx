@@ -9,29 +9,53 @@ class API {
   apiRootUrl: string
   lastRefresh: Date
   horizon: any
+  didConnect: boolean
 
   constructor(store) {
     this.retryQueue = []
     this.store = store
     this.apiRootUrl = '/api/'
+    this.didConnect = false
   }
 
   connect(token: string) {
-    this.horizon = Horizon({
-      host: 'localhost:9000',
-      secure: false,
-      authType: {
-        storeLocally: true,
-        token: token
-      }
-    })
-    this.horizon.onReady(() => {
-    })
+    return new Promise((resolve, reject) => {
+      this.horizon = Horizon({
+        host: 'localhost:9000',
+        secure: false,
+        authType: {
+          storeLocally: true,
+          token: token
+        }
+      })
 
-    this.horizon.onSocketError((err) => {
-    })
+      this.horizon.onReady(() => {
+        debugger
+        // TODO - fetch user info?
+        this.didConnect = true
+        resolve()
+      })
 
-    this.horizon.connect()
+      this.horizon.status((status) => {
+        debugger
+      })
+
+      this.horizon.onDisconnected((err) => {
+        debugger
+      })
+
+      this.horizon.onSocketError((err) => {
+        debugger
+        if (!this.didConnect) {
+          reject(err)
+        } else {
+          // TODO - Do some reconnect logic here
+        }
+      })
+
+      debugger
+      this.horizon.connect()
+    })
   }
 
   authenticate(email, password) {

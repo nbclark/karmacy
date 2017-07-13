@@ -14,49 +14,52 @@ var localIndex = 0
 
 class Actions {
 
-  loadInitialState() {
+  loadInitialState(token: string) {
     return (dispatch, getState) => {
       // Open up a socket connection on first load
-
-      dispatch({ type: 'START_LOADING_TEAMS' })
-      dispatch({ type: 'START_LOADING_COMPANY' })
-      dispatch({ type: 'START_LOADING_USER' })
-      dispatch({ type: 'START_LOADING_MEMBERS' })
-      dispatch({ type: 'START_LOADING_QUESTIONS' })
-      dispatch({ type: 'START_LOADING_POLL' })
-
-      // Joint load so we can add names to the rooms
-      Karma.API.loadMe().then((user) => {
+      debugger
+      Karma.API.connect(token).then((user) => {
         debugger
-        var emptyPromise = $.Deferred()
-        emptyPromise.resolve([])
+        dispatch({ type: 'START_LOADING_TEAMS' })
+        dispatch({ type: 'START_LOADING_COMPANY' })
+        dispatch({ type: 'START_LOADING_USER' })
+        dispatch({ type: 'START_LOADING_MEMBERS' })
+        dispatch({ type: 'START_LOADING_QUESTIONS' })
+        dispatch({ type: 'START_LOADING_POLL' })
 
-        var isAdmin = user.Role === "Administrator"
-        var loadTeams = isAdmin ? Karma.API.loadTeams() : emptyPromise
-        var loadQuestions = isAdmin ? Karma.API.loadQuestions() : emptyPromise
-        var loadMembers = isAdmin ? Karma.API.loadMembers() : emptyPromise
-
-        $.when(
-          Karma.API.loadCompany(), loadTeams,
-          loadMembers, Karma.API.loadProducts(), loadQuestions,
-          Karma.API.loadPoll()
-        ).then((company, teams, members, products, questions, poll) => {
-
-          alert(1)
-          dispatch({ type: 'RECEIVED_USER', data: user })
-          dispatch({ type: 'RECEIVED_COMPANY', data: company })
-          dispatch({ type: 'RECEIVED_TEAMS', data: teams })
-          dispatch({ type: 'RECEIVED_MEMBERS', data: members })
-          dispatch({ type: 'RECEIVED_PRODUCTS', data: products })
-          dispatch({ type: 'RECEIVED_QUESTIONS', data: questions })
-          dispatch({ type: 'RECEIVED_POLL', data: poll })
-
-        })
-      })
-        .catch((err) => {
+        // Joint load so we can add names to the rooms
+        Karma.API.loadMe().then((user) => {
           debugger
-          document.location.replace('/login.html')
+          var emptyPromise = $.Deferred()
+          emptyPromise.resolve([])
+
+          var isAdmin = user.Role === "Administrator"
+          var loadTeams = isAdmin ? Karma.API.loadTeams() : emptyPromise
+          var loadQuestions = isAdmin ? Karma.API.loadQuestions() : emptyPromise
+          var loadMembers = isAdmin ? Karma.API.loadMembers() : emptyPromise
+
+          $.when(
+            Karma.API.loadCompany(), loadTeams,
+            loadMembers, Karma.API.loadProducts(), loadQuestions,
+            Karma.API.loadPoll()
+          ).then((company, teams, members, products, questions, poll) => {
+
+            alert(1)
+            dispatch({ type: 'RECEIVED_USER', data: user })
+            dispatch({ type: 'RECEIVED_COMPANY', data: company })
+            dispatch({ type: 'RECEIVED_TEAMS', data: teams })
+            dispatch({ type: 'RECEIVED_MEMBERS', data: members })
+            dispatch({ type: 'RECEIVED_PRODUCTS', data: products })
+            dispatch({ type: 'RECEIVED_QUESTIONS', data: questions })
+            dispatch({ type: 'RECEIVED_POLL', data: poll })
+
+          })
         })
+          .catch((err) => {
+            debugger
+            document.location.replace('/login.html')
+          })
+      })
     }
   }
 

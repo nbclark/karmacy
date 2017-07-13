@@ -14,7 +14,8 @@ interface IComponentProps extends React.Props<MainPage> {
 }
 
 interface IComponentState {
-  isLoaded?: boolean
+  isLoaded?: boolean,
+  isLoading?: boolean
 }
 
 class MainPage extends Component<IComponentProps, IComponentState> {
@@ -29,10 +30,16 @@ class MainPage extends Component<IComponentProps, IComponentState> {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.checkAuth(nextProps)
+    if (!this.state.isLoading) {
+      this.checkAuth(nextProps)
+    }
   }
 
   checkAuth(nextProps) {
+    this.props.dispatch(Actions.loadInitialState('asd'))
+    this.setState({ isLoading: true })
+    return
+    // TODO - remove this
     if (nextProps.userInfo.isHydrated && !nextProps.userInfo.loggedInUser) {
       console.log('logging out')
       this.props.dispatch(pushPath('/login.html', {}))

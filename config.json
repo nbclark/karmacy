@@ -1,0 +1,10 @@
+{
+  "slackClientID      ": "22700245127.22701416598",
+  "googleClientID     ": "150191068569-711stok98bf183cje6nclu0tjvbdg8dl.apps.googleusercontent.com",
+  "googleClientSecret ": "MgL7rBmGBmMp_4aFGZhLXOEk",
+  "applicationName    ": "Project Karma",
+  "redisHost          ": "localhost:6379",
+  "redisDBNumber      ": 0,
+  "karmaDBHost        ": "localhost:28015",
+  "karmaDBName        ": "karmacy"
+}

@@ -24432,11 +24432,17 @@
 	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
-	            this.checkAuth(nextProps);
+	            if (!this.state.isLoading) {
+	                this.checkAuth(nextProps);
+	            }
 	        }
 	    }, {
 	        key: 'checkAuth',
 	        value: function checkAuth(nextProps) {
+	            this.props.dispatch(_karmaStore2.default.loadInitialState('asd'));
+	            this.setState({ isLoading: true });
+	            return;
+	            // TODO - remove this
 	            if (nextProps.userInfo.isHydrated && !nextProps.userInfo.loggedInUser) {
 	                console.log('logging out');
 	                this.props.dispatch((0, _reduxSimpleRouter.pushPath)('/login.html', {}));
@@ -24516,37 +24522,41 @@
 
 	    _createClass(Actions, [{
 	        key: 'loadInitialState',
-	        value: function loadInitialState() {
+	        value: function loadInitialState(token) {
 	            return function (dispatch, getState) {
 	                // Open up a socket connection on first load
-	                dispatch({ type: 'START_LOADING_TEAMS' });
-	                dispatch({ type: 'START_LOADING_COMPANY' });
-	                dispatch({ type: 'START_LOADING_USER' });
-	                dispatch({ type: 'START_LOADING_MEMBERS' });
-	                dispatch({ type: 'START_LOADING_QUESTIONS' });
-	                dispatch({ type: 'START_LOADING_POLL' });
-	                // Joint load so we can add names to the rooms
-	                _karma2.default.API.loadMe().then(function (user) {
+	                debugger;
+	                _karma2.default.API.connect(token).then(function (user) {
 	                    debugger;
-	                    var emptyPromise = $.Deferred();
-	                    emptyPromise.resolve([]);
-	                    var isAdmin = user.Role === "Administrator";
-	                    var loadTeams = isAdmin ? _karma2.default.API.loadTeams() : emptyPromise;
-	                    var loadQuestions = isAdmin ? _karma2.default.API.loadQuestions() : emptyPromise;
-	                    var loadMembers = isAdmin ? _karma2.default.API.loadMembers() : emptyPromise;
-	                    $.when(_karma2.default.API.loadCompany(), loadTeams, loadMembers, _karma2.default.API.loadProducts(), loadQuestions, _karma2.default.API.loadPoll()).then(function (company, teams, members, products, questions, poll) {
-	                        alert(1);
-	                        dispatch({ type: 'RECEIVED_USER', data: user });
-	                        dispatch({ type: 'RECEIVED_COMPANY', data: company });
-	                        dispatch({ type: 'RECEIVED_TEAMS', data: teams });
-	                        dispatch({ type: 'RECEIVED_MEMBERS', data: members });
-	                        dispatch({ type: 'RECEIVED_PRODUCTS', data: products });
-	                        dispatch({ type: 'RECEIVED_QUESTIONS', data: questions });
-	                        dispatch({ type: 'RECEIVED_POLL', data: poll });
+	                    dispatch({ type: 'START_LOADING_TEAMS' });
+	                    dispatch({ type: 'START_LOADING_COMPANY' });
+	                    dispatch({ type: 'START_LOADING_USER' });
+	                    dispatch({ type: 'START_LOADING_MEMBERS' });
+	                    dispatch({ type: 'START_LOADING_QUESTIONS' });
+	                    dispatch({ type: 'START_LOADING_POLL' });
+	                    // Joint load so we can add names to the rooms
+	                    _karma2.default.API.loadMe().then(function (user) {
+	                        debugger;
+	                        var emptyPromise = $.Deferred();
+	                        emptyPromise.resolve([]);
+	                        var isAdmin = user.Role === "Administrator";
+	                        var loadTeams = isAdmin ? _karma2.default.API.loadTeams() : emptyPromise;
+	                        var loadQuestions = isAdmin ? _karma2.default.API.loadQuestions() : emptyPromise;
+	                        var loadMembers = isAdmin ? _karma2.default.API.loadMembers() : emptyPromise;
+	                        $.when(_karma2.default.API.loadCompany(), loadTeams, loadMembers, _karma2.default.API.loadProducts(), loadQuestions, _karma2.default.API.loadPoll()).then(function (company, teams, members, products, questions, poll) {
+	                            alert(1);
+	                            dispatch({ type: 'RECEIVED_USER', data: user });
+	                            dispatch({ type: 'RECEIVED_COMPANY', data: company });
+	                            dispatch({ type: 'RECEIVED_TEAMS', data: teams });
+	                            dispatch({ type: 'RECEIVED_MEMBERS', data: members });
+	                            dispatch({ type: 'RECEIVED_PRODUCTS', data: products });
+	                            dispatch({ type: 'RECEIVED_QUESTIONS', data: questions });
+	                            dispatch({ type: 'RECEIVED_POLL', data: poll });
+	                        });
+	                    }).catch(function (err) {
+	                        debugger;
+	                        document.location.replace('/login.html');
 	                    });
-	                }).catch(function (err) {
-	                    debugger;
-	                    document.location.replace('/login.html');
 	                });
 	            };
 	        }
@@ -48405,32 +48415,54 @@
 	        this.retryQueue = [];
 	        this.store = store;
 	        this.apiRootUrl = '/api/';
+	        this.didConnect = false;
 	    }
 
 	    _createClass(API, [{
 	        key: 'connect',
 	        value: function connect(token) {
-	            this.horizon = Horizon({
-	                host: 'localhost:9000',
-	                secure: false,
-	                authType: {
-	                    storeLocally: true,
-	                    token: token
-	                }
+	            var _this = this;
+
+	            return new Promise(function (resolve, reject) {
+	                _this.horizon = Horizon({
+	                    host: 'localhost:9000',
+	                    secure: false,
+	                    authType: {
+	                        storeLocally: true,
+	                        token: token
+	                    }
+	                });
+	                _this.horizon.onReady(function () {
+	                    debugger;
+	                    // TODO - fetch user info?
+	                    _this.didConnect = true;
+	                    resolve();
+	                });
+	                _this.horizon.status(function (status) {
+	                    debugger;
+	                });
+	                _this.horizon.onDisconnected(function (err) {
+	                    debugger;
+	                });
+	                _this.horizon.onSocketError(function (err) {
+	                    debugger;
+	                    if (!_this.didConnect) {
+	                        reject(err);
+	                    } else {}
+	                });
+	                debugger;
+	                _this.horizon.connect();
 	            });
-	            this.horizon.onReady(function () {});
-	            this.horizon.onSocketError(function (err) {});
-	            this.horizon.connect();
 	        }
 	    }, {
 	        key: 'authenticate',
 	        value: function authenticate(email, password) {
-	            var _this = this;
+	            var _this2 = this;
 
 	            return new Promise(function (resolve, reject) {
 	                $.post('/identity/authenticate', JSON.stringify({ username: email, password: password }), null, 'json').done(function (data) {
 	                    console.log('got tokens');
-	                    _this.tokens = data;
+	                    _this2.tokens = data;
 	                    resolve(data);
 	                }).fail(function () {
 	                    reject();
@@ -48440,7 +48472,7 @@
 	    }, {
 	        key: 'refreshAccessToken',
 	        value: function refreshAccessToken(token) {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            var now = new Date();
 	            if (this.lastRefresh && now.getTime() - this.lastRefresh.getTime() < 5000) {
@@ -48452,7 +48484,7 @@
 	            return new Promise(function (resolve, reject) {
 	                $.post('/identity/refresh', JSON.stringify({ refresh_token: token }), null, 'json').done(function (data) {
 	                    console.log('got tokens');
-	                    _this2.tokens = data;
+	                    _this3.tokens = data;
 	                    resolve(data);
 	                }).fail(function () {
 	                    reject();
@@ -48462,10 +48494,10 @@
 	    }, {
 	        key: 'loadMe',
 	        value: function loadMe() {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this3.apiRootUrl + 'me', {
+	                $.ajax(_this4.apiRootUrl + 'me', {
 	                    // beforeSend: (xhr) => {
 	                    //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens['access_token'])
 	                    // },
@@ -48475,7 +48507,7 @@
 	                    resolve(data);
 	                }).fail(function (xhr) {
 	                    if (xhr.status == 401) {
-	                        _this3._processAccessTokenExpiration(_this3.loadMe);
+	                        _this4._processAccessTokenExpiration(_this4.loadMe);
 	                    } else {
 	                        reject();
 	                    }
@@ -48485,10 +48517,10 @@
 	    }, {
 	        key: 'loadTeams',
 	        value: function loadTeams() {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this4.apiRootUrl + 'teams', {
+	                $.ajax(_this5.apiRootUrl + 'teams', {
 	                    // beforeSend: (xhr) => {
 	                    //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
 	                    // },
@@ -48497,7 +48529,7 @@
 	                    resolve(data);
 	                }).fail(function (xhr) {
 	                    if (xhr.status == 401) {
-	                        _this4._processAccessTokenExpiration(_this4.loadTeams);
+	                        _this5._processAccessTokenExpiration(_this5.loadTeams);
 	                    }
 	                });
 	            });
@@ -48505,10 +48537,10 @@
 	    }, {
 	        key: 'loadCompany',
 	        value: function loadCompany() {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this5.apiRootUrl + 'company', {
+	                $.ajax(_this6.apiRootUrl + 'company', {
 	                    // beforeSend: (xhr) => {
 	                    //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
 	                    // },
@@ -48517,7 +48549,7 @@
 	                    resolve(data);
 	                }).fail(function (xhr) {
 	                    if (xhr.status == 401) {
-	                        _this5._processAccessTokenExpiration(_this5.loadCompany);
+	                        _this6._processAccessTokenExpiration(_this6.loadCompany);
 	                    }
 	                });
 	            });
@@ -48525,10 +48557,10 @@
 	    }, {
 	        key: 'loadPoll',
 	        value: function loadPoll() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this6.apiRootUrl + 'poll', {
+	                $.ajax(_this7.apiRootUrl + 'poll', {
 	                    // beforeSend: (xhr) => {
 	                    //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
 	                    // },
@@ -48543,10 +48575,10 @@
 	    }, {
 	        key: 'loadMembers',
 	        value: function loadMembers() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this7.apiRootUrl + 'company/accounts', {
+	                $.ajax(_this8.apiRootUrl + 'company/accounts', {
 	                    // beforeSend: (xhr) => {
 	                    //   xhr.setRequestHeader ("Authorization", "Bearer " + self.tokens.access_token)
 	                    // },
@@ -48564,10 +48596,10 @@
 	    }, {
 	        key: 'loadProducts',
 	        value: function loadProducts() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this8.apiRootUrl + 'products', {
+	                $.ajax(_this9.apiRootUrl + 'products', {
 	                    contentType: 'application/json'
 	                }).done(function (data) {
 	                    resolve(data);
@@ -48579,10 +48611,10 @@
 	    }, {
 	        key: 'loadQuestions',
 	        value: function loadQuestions() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this9.apiRootUrl + 'questions', {
+	                $.ajax(_this10.apiRootUrl + 'questions', {
 	                    contentType: 'application/json'
 	                }).done(function (data) {
 	                    resolve(data);
@@ -48595,10 +48627,10 @@
 	    }, {
 	        key: 'loadPollResults',
 	        value: function loadPollResults(instanceID) {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this10.apiRootUrl + 'poll/' + instanceID, {
+	                $.ajax(_this11.apiRootUrl + 'poll/' + instanceID, {
 	                    contentType: 'application/json'
 	                }).done(function (data) {
 	                    resolve(data);
@@ -48610,10 +48642,10 @@
 	    }, {
 	        key: 'createQuestion',
 	        value: function createQuestion(title, options, type, position) {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this11.apiRootUrl + 'questions', {
+	                $.ajax(_this12.apiRootUrl + 'questions', {
 	                    type: "POST",
 	                    data: JSON.stringify({ Title: title, Options: options, QuestionType: type, Position: position }),
 	                    contentType: 'application/json'
@@ -48629,10 +48661,10 @@
 	    }, {
 	        key: 'setQuestionPosition',
 	        value: function setQuestionPosition(questionID, position) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this12.apiRootUrl + 'questions/' + questionID, {
+	                $.ajax(_this13.apiRootUrl + 'questions/' + questionID, {
 	                    type: "PUT",
 	                    data: JSON.stringify({ Position: position }),
 	                    contentType: 'application/json'
@@ -48648,10 +48680,10 @@
 	    }, {
 	        key: 'createTeam',
 	        value: function createTeam(teamName) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this13.apiRootUrl + 'teams', {
+	                $.ajax(_this14.apiRootUrl + 'teams', {
 	                    type: "POST",
 	                    data: JSON.stringify({ Name: teamName }),
 	                    contentType: 'application/json'
@@ -48667,10 +48699,10 @@
 	    }, {
 	        key: 'createProduct',
 	        value: function createProduct(name, description, price, quantity) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this14.apiRootUrl + 'products', {
+	                $.ajax(_this15.apiRootUrl + 'products', {
 	                    type: "POST",
 	                    data: JSON.stringify({ Name: name, Description: description, Price: price, Quantity: quantity }),
 	                    contentType: 'application/json'
@@ -48687,10 +48719,10 @@
 	    }, {
 	        key: 'submitPollResponse',
 	        value: function submitPollResponse(pollID, option, response, suggestion) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this15.apiRootUrl + 'poll/instanceid/' + pollID, {
+	                $.ajax(_this16.apiRootUrl + 'poll/instanceid/' + pollID, {
 	                    type: "POST",
 	                    data: JSON.stringify({
 	                        Option: option,
@@ -48710,10 +48742,10 @@
 	    }, {
 	        key: 'sendPollResponseMessage',
 	        value: function sendPollResponseMessage(instanceID, pollID, comments) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this16.apiRootUrl + 'poll/' + instanceID + '/' + pollID + '/message', {
+	                $.ajax(_this17.apiRootUrl + 'poll/' + instanceID + '/' + pollID + '/message', {
 	                    type: "POST",
 	                    data: JSON.stringify({
 	                        Comments: comments
@@ -48731,10 +48763,10 @@
 	    }, {
 	        key: 'purchaseProduct',
 	        value: function purchaseProduct(productID, price) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this17.apiRootUrl + 'purchase', {
+	                $.ajax(_this18.apiRootUrl + 'purchase', {
 	                    type: "POST",
 	                    data: JSON.stringify({ ProductID: productID, Price: price }),
 	                    contentType: 'application/json'
@@ -48748,10 +48780,10 @@
 	    }, {
 	        key: 'donateKarma',
 	        value: function donateKarma(toAccountID, amount, message) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this18.apiRootUrl + 'donate', {
+	                $.ajax(_this19.apiRootUrl + 'donate', {
 	                    type: "POST",
 	                    data: JSON.stringify({ ToAccountID: toAccountID, Amount: amount, Message: message }),
 	                    contentType: 'application/json'
@@ -48765,10 +48797,10 @@
 	    }, {
 	        key: 'assignMember',
 	        value: function assignMember(memberID, teamID) {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this19.apiRootUrl + 'teams/members', {
+	                $.ajax(_this20.apiRootUrl + 'teams/members', {
 	                    type: "POST",
 	                    data: JSON.stringify({ MemberID: memberID, TeamID: teamID }),
 	                    contentType: 'application/json'
@@ -48784,10 +48816,10 @@
 	    }, {
 	        key: 'sendInvite',
 	        value: function sendInvite(email, firstName, lastName, role, teamID) {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                $.ajax(_this20.apiRootUrl + 'company/accounts', {
+	                $.ajax(_this21.apiRootUrl + 'company/accounts', {
 	                    type: "POST",
 	                    data: JSON.stringify({
 	                        Email: email, Role: role, TeamID: teamID,
