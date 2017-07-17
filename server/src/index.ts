@@ -1,12 +1,15 @@
 // Embedding Horizon server according to http://horizon.io/docs/embed/
 const _ = require('lodash');
 const express = require('express');
-const horizon = require('@horizon/server');
 const fetch = require('node-fetch')
 const cors = require('cors')
 const config = require('./config')
 const path = require('path')
-const RestService = require('./rest.api.js')
+const RestService = require('./rest.api')
+const auth = require('./auth/')
+import Context from './context'
+
+import Company from './models/company'
 
 const port = 9000
 
@@ -15,36 +18,26 @@ app.use(cors())
 app.use(require('cookie-parser')());
 app.use(require('body-parser').json({ limit: '5mb' }));
 app.use(require('express-session')({ secret: 'secret', resave: false, saveUninitialized: false }));
+app.use((req: any, res: any, next: any): any => {
+  req.ctx = new Context()
+  next()
+})
 
 const jwt = require('jsonwebtoken');
 const httpServer = app.listen(port);
 
-const logger = horizon.logger
-logger.level = 'info'
+Context.init(config.pgsql)
 
-const horizonServer = horizon(httpServer, config.horizon)
+const ctx = new Context()
+const company = Company.create(ctx, 'test #1', 'karmacy.io')
 
-var conn, r, hzHelper, restService = new RestService();
-
-horizonServer._reql_conn.ready().then(c => {
-  conn = c.connection();
-  r = horizon.r;
-
-  restService.init(conn)
-
-  const restRouter = new express.Router()
-  restService.registerRoutes(restRouter)
-  app.use('/api/rest', restRouter)
-  app.use('/api/rest', restRouter)
-
-}).catch((err) => {
-  console.log(err)
-  process.exit(-1)
-})
-
-app.get('/login/oauth2callback', function (req, res) {
-  const code = req.query.code
-  res.json({})
+app.get('/login/oauth2callback', function (req: any, res: any) {
+  const state = req.query.state
+  if (state && auth[state]) {
+    //auth[state].authenticate(db, conn, req.query)
+  } else {
+    // TODO - redirect to login
+  }
 
   // providerName := r.URL.Query().Get("state")
   // provider := _providers[providerName]

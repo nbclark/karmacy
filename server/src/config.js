@@ -5,6 +5,9 @@ const toml = require('toml')
 const token_secret = toml.parse(fs.readFileSync(path.join(__dirname, '../.hz/secrets.toml'))).token_secret;
 
 module.exports = {
+  pgsql: {
+
+  },
   horizon: {
     rdb_host: 'localhost',
     project_name: 'karmacy',
