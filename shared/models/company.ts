@@ -12,6 +12,12 @@ class Company extends Entity {
 
   constructor(obj: any) {
     super(obj)
+  }
+
+  load(obj: any) {
+    super.load(obj)
+
+    console.log(obj)
 
     this.name = obj.name
     this.domain = obj.domain

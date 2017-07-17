@@ -16,10 +16,7 @@ export default class DBContext {
     if (obj._need_save) {
       return this.insert(obj._table_name, obj)
     } else {
-      return new Promise<DBEntity>((resolve, reject) => {
-        const data = obj.toJSON()
-        console.log(obj._need_save)
-      })
+      return this.update(obj._table_name, obj)
     }
   }
 
@@ -27,18 +24,46 @@ export default class DBContext {
     const json: any = obj.toJSON()
     const columns: string[] = Object.keys(json).map((c) => '${' + c + '}')
 
-    console.log(columns)
-
     return new Promise<DBEntity>((resolve, reject) => {
       DBContext.db_connection.query(
-        'INSERT INTO ' + table + '(${this~}) VALUES(' + columns + ')',
+        'INSERT INTO ' + table + '(${this~}) VALUES(' + columns + ') RETURNING ${this~}, created, updated',
         json
       )
         .then((value) => {
-          console.log(value)
+          obj.load(value[0])
+          resolve(obj)
         })
         .catch((err) => {
-          console.log(err)
+          console.error(err)
+          reject(err)
+        })
+    })
+  }
+
+  update(table: string, obj: DBEntity): Promise<DBEntity> {
+    const json: any = obj.toJSON()
+    const id: string = json.id
+    const columns: string[] = Object.keys(json).filter((c) => c !== 'id')
+    const updates: string[] = columns.map((c, idx) => `${pgp.as.name(c)} = $${idx + 1}`)
+    const returns: string[] = columns.map((c, idx) => `${pgp.as.name(c)}`)
+    const values: any[] = columns.map((c, idx) => json[c]).concat([id])
+
+    return new Promise<DBEntity>((resolve, reject) => {
+      DBContext.db_connection.query(
+        `
+          UPDATE ${table} SET ${updates.join()}
+          WHERE id = $${values.length}
+          RETURNING id, ${returns.join()}, created, updated
+        `,
+        values
+      )
+        .then((value) => {
+          obj.load(value[0])
+          resolve(obj)
+        })
+        .catch((err) => {
+          console.error(err)
+          reject(err)
         })
     })
   }

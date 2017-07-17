@@ -29,7 +29,15 @@ const httpServer = app.listen(port);
 Context.init(config.pgsql)
 
 const ctx = new Context()
-const company = Company.create(ctx, 'test #1', 'karmacy.io')
+Company.create(ctx, 'test #1', 'karmacy.io')
+  .then((company) => {
+    setTimeout(() => {
+      company.name = 'test #2'
+      console.log('save #2')
+      company.save(ctx)
+    }, 500)
+  })
+  .catch((err) => console.log(err))
 
 app.get('/login/oauth2callback', function (req: any, res: any) {
   const state = req.query.state

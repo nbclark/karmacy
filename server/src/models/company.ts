@@ -7,9 +7,12 @@ export default class extends DBEntity(Company, 'companies') {
     super(obj)
   }
 
-  static create(ctx: Context, name: string, domain: string) {
+  static create(ctx: Context, name: string, domain: string): Promise<Company> {
     var company = new this({ name, domain })
-    company.save(ctx)
-    return company
+    return new Promise<Company>((resolve, reject) => {
+      company.save(ctx)
+        .then((obj) => resolve(company))
+        .catch((err) => reject(err))
+    })
   }
 }
